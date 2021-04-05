@@ -1,0 +1,8 @@
+ 
+language: php
+php:
+  - '7.2'
+  - '7.3'
+  - '7.4'
+script:
+- phpunit --bootstrap test/autoload_tasks.php test/BackGroundPHPTasksTest.php
