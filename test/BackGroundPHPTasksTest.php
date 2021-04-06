@@ -71,6 +71,31 @@ class BackGroundPHPTasksTest extends TestCase
     {
         $task = new BackgroundPHPTask();
         $this->assertEquals("pending", $task->get_status());
+        $outputFile = tempnam(sys_get_temp_dir(), 'out');
+        $task   ->set_phpScript( $this->createTestScriptFile() )
+                    ->set_outputFile( $outputFile )
+                    ->set_pidFile("./testpid.pid")
+                    ->add_arg("chocolatine")
+                    ->add_arg("pain au chocolat")
+                    -> exec();
+        
+        $this->assertEquals("running", $task->get_status());
+
+        $task->stop();
+        $this->assertEquals("terminated", $task->get_status());
+
+
+        //test with a task that will be finished quickly
+       $task = new BackgroundPHPTask();
+       $script = '<?php echo 1; ?>';
+       $scriptFullName = tempnam(sys_get_temp_dir(), 'testScript');
+       file_put_contents($scriptFullName, $script);
+       $task   ->set_phpScript( $scriptFullName )
+       ->set_outputFile( $outputFile )
+       ->set_pidFile("./testpid.pid")
+       -> exec();
+       sleep(1);
+       $this->assertEquals("terminated", $task->get_status());
 
     }
 
