@@ -199,10 +199,8 @@ class BackGroundPHPTasksTest extends TestCase
                     ->add_task_on_queue($task2)
                     ->add_task_on_queue($task3);
 
-
+        sleep(1);
         $this->assertFalse(strrpos(file_get_contents ($outputFile1),"heyscript1hey") === false);
-        $this->assertTrue(strrpos(file_get_contents ($outputFile2),"hoscript2ho") === false);
-        $this->assertTrue(strrpos(file_get_contents ($outputFile3),"dtufjfj(yu") === false);
         $taskQueue ->check_queue();
         sleep(1);
         $this->assertFalse(strrpos(file_get_contents ($outputFile2),"hoscript2ho") === false);
