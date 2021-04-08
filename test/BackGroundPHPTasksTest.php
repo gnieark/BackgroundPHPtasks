@@ -96,6 +96,7 @@ class BackGroundPHPTasksTest extends TestCase
        -> exec();
        sleep(1);
        $this->assertEquals("terminated", $task->get_status());
+       unlink("./testpid.pid");
 
     }
     public function testRemoveOutputFile()
@@ -113,7 +114,7 @@ class BackGroundPHPTasksTest extends TestCase
         }else{
             $this->assertFalse(file_exists("./out.txt"));
         }
-      
+        unlink("./testpid.pid");
 
         
     }
