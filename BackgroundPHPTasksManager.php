@@ -155,7 +155,19 @@ class BackgroundTasksManager
         return ($pid !== '') && file_exists("/proc/$pid");
     }
 
-
+    /*
+    * stop all running tasks, remove PID file and knowed output files
+    */
+    public function stop_and_remove()
+    {
+        foreach($this->tasks as $task)
+        {
+            $task->stop()->remove_output_file();
+        }
+        @unlink ( $this->get_pid_file_path() );
+        @unlink ( $this->get_backup_file() );
+        return $this;
+    }
 
 
 }

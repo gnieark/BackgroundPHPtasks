@@ -113,6 +113,7 @@ class BackGroundPHPTasksTest extends TestCase
         }else{
             $this->assertFalse(file_exists("./out.txt"));
         }
+      
 
         
     }
@@ -215,7 +216,26 @@ class BackGroundPHPTasksTest extends TestCase
         $this->assertFalse(strrpos(file_get_contents ($outputFile3),"dtufjfj(yu") === false);
 
     }
+    public function testRemoveAll()
+    {
+        $basePath = sys_get_temp_dir()."/BackgroundTasksManager";
+        $taskQueue = new BackgroundTasksManager($basePath);
+        $taskQueue -> stop_and_remove();
+
+        if(method_exists($this,"assertFileDoesNotExist") ){
+            $this->assertFileDoesNotExist(sys_get_temp_dir()."/BackgroundTasksManager/TaskManager.pid"); 
+        }else{
+            $this->assertFalse(file_exists("/BackgroundTasksManager/TaskManager.pid"));
+        }
+
+        if(method_exists($this,"assertFileDoesNotExist") ){
+            $this->assertFileDoesNotExist(sys_get_temp_dir()."/BackgroundTasksManager/TaskManager.serialized"); 
+        }else{
+            $this->assertFalse(file_exists("/BackgroundTasksManager/TaskManager.serialized"));
+        }
 
 
+
+    }
 
 }
