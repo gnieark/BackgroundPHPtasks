@@ -107,7 +107,13 @@ class BackGroundPHPTasksTest extends TestCase
                     -> exec();
         $this->assertFileExists("./out.txt");
         $waitTask->stop()->remove_output_file();
-        $this->assertFileDoesNotExist("./out.txt");
+        if(method_exists($this,"assertFileDoesNotExist") )
+        {
+            $this->assertFileDoesNotExist("./out.txt"); //on php 7.2 Travis use phpunit 8 and not 9
+        }else{
+            $this->assertFalse(file_exists("./out.txt"));
+        }
+
         
     }
 
