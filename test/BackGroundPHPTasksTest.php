@@ -98,5 +98,120 @@ class BackGroundPHPTasksTest extends TestCase
        $this->assertEquals("terminated", $task->get_status());
 
     }
+    public function testRemoveOutputFile()
+    {
+        $waitTask = new BackgroundPHPTask();
+        $waitTask   ->set_phpScript( $this->createTestScriptFile() )
+                    ->set_outputFile("./out.txt")
+                    ->set_pidFile("./testpid.pid")
+                    -> exec();
+        $this->assertFileExists("./out.txt");
+        $waitTask->stop()->remove_output_file();
+        $this->assertFileDoesNotExist("./out.txt");
+        
+    }
+
+    public function testManagerQueue()
+    {
+        $basePath = sys_get_temp_dir()."/BackgroundTasksManager";
+        //purge base path
+        $files = glob($basePath .'/*'); // get all file names
+        foreach($files as $file){ // iterate files
+            if(is_file($file)) {
+                unlink($file); // delete file
+            }
+        }
+
+        $script1 = '<?php echo "hey"; sleep(3); ?>';
+        $script2 = '<?php echo "ho"; sleep(3); ?>';
+
+        $script1FullName = tempnam( sys_get_temp_dir(), 'testScript');
+        $script2FullName = tempnam( sys_get_temp_dir(), 'testScript');
+
+        file_put_contents($script1FullName,$script1);
+        file_put_contents($script2FullName,$script2);
+
+        $basePath = sys_get_temp_dir()."/BackgroundTasksManager";
+        @mkdir($basePath);
+        $taskQueue = new BackgroundTasksManager($basePath);
+
+        $task1ToAdd = new BackgroundPHPTask();
+        $task1ToAdd->set_phpScript( $script1FullName );
+        $taskQueue->add_task_on_queue($task1ToAdd);
+
+        $task2ToAdd = new BackgroundPHPTask();
+        $task2ToAdd->set_phpScript( $script2FullName );
+        $taskQueue->add_task_on_queue($task2ToAdd);
+        
+        $this->assertEquals("running", $task1ToAdd->get_status());
+        sleep(4);
+        $this->assertEquals("terminated", $task1ToAdd->get_status());
+
+        $taskQueue->check_queue();
+        $this->assertEquals("running", $task2ToAdd->get_status());
+
+        $task2ToAdd->stop();
+    }
+
+    public function testOutputFiles()
+    {
+        $basePath = sys_get_temp_dir()."/BackgroundTasksManager";
+        //purge base path
+        $files = glob($basePath .'/*'); // get all file names
+        foreach($files as $file){ // iterate files
+            if(is_file($file)) {
+                unlink($file); // delete file
+            }
+        }
+
+        $script1 = '<?php echo "heyscript1hey\nplip";?>';
+        $script2 = '<?php echo "hoscript2ho";?>';
+        $script3 = '<?php echo "dtufjfj(yu";?>';
+
+        $script1FullName = tempnam( sys_get_temp_dir(), 'testScript');
+        $script2FullName = tempnam( sys_get_temp_dir(), 'testScript');
+        $script3FullName = tempnam( sys_get_temp_dir(), 'testScript');
+
+        $outputFile1 = tempnam( sys_get_temp_dir(), 'testScript');
+        $outputFile2 = tempnam( sys_get_temp_dir(), 'testScript');
+        $outputFile3 = tempnam( sys_get_temp_dir(), 'testScript');
+
+        file_put_contents($script1FullName,$script1);
+        file_put_contents($script2FullName,$script2);
+        file_put_contents($script3FullName,$script3);
+
+        $task1 = new BackgroundPHPTask();
+        $task1 ->set_phpScript($script1FullName)
+               ->set_outputFile($outputFile1)
+               ->set_identifier("task1");
+
+        $task2 = new BackgroundPHPTask();
+        $task2 ->set_phpScript($script2FullName)
+                ->set_outputFile($outputFile2)
+                ->set_identifier("task2");
+        $task3 = new BackgroundPHPTask();
+        $task3 ->set_phpScript($script3FullName)
+                ->set_outputFile($outputFile3)
+                ->set_identifier("task3");
+        
+        $taskQueue = new BackgroundTasksManager($basePath);
+        $taskQueue ->add_task_on_queue($task1)
+                    ->add_task_on_queue($task2)
+                    ->add_task_on_queue($task3);
+
+
+        $this->assertFalse(strrpos(file_get_contents ($outputFile1),"heyscript1hey") === false);
+        $this->assertTrue(strrpos(file_get_contents ($outputFile2),"hoscript2ho") === false);
+        $this->assertTrue(strrpos(file_get_contents ($outputFile3),"dtufjfj(yu") === false);
+        $taskQueue ->check_queue();
+        sleep(1);
+        $this->assertFalse(strrpos(file_get_contents ($outputFile2),"hoscript2ho") === false);
+        $taskQueue ->check_queue();
+        sleep(1);
+        $this->assertFalse(strrpos(file_get_contents ($outputFile3),"dtufjfj(yu") === false);
+
+    }
+
+
 
 }
