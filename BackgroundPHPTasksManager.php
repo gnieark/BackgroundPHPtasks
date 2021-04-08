@@ -15,6 +15,10 @@ class BackgroundTasksManager
     {
         return $this->base_path . "/TaskManager.serialized";
     }
+    private function get_daemon_pid_file()
+    {
+        return $this->base_path . "/taskmanagerDaemon.pid";
+    }
 
     public function __construct($base_path)
     {
@@ -81,12 +85,65 @@ class BackgroundTasksManager
     } 
 
     /*
+    * Return false if not running
+    * return the pid  if running
+    */
+    public function is_daemon_running()
+    {
+        if(!file_exists($this->get_daemon_pid_file())){
+            return false;
+        }
+        $data = file($this->get_daemon_pid_file());
+        $daemonPid = intval( $data[count($data) -1] );
+        return $daemonPid ;
+    }
+
+    public function daemon_stop()
+    {
+        $daemonPid = $this->is_daemon_running();
+        if($daemonPid)
+        {
+            posix_kill( $daemonPid, SIGTERM );
+            unlink($this->get_daemon_pid_file());
+
+        }
+        return $this;
+    }
+
+    /*
     * @input $delay : seconds
     *   
     */
-    public function schedule_check_queue($delay)
+    public function daemonize_check_queue($delay = 10)
     {
+   
+        $this->daemon_stop();
 
+        $rfBackgroundTasksManager = new \ReflectionClass ('BackgroundTasksManager');
+        $BackgroundTasksManagerClassFile = $rfBackgroundTasksManager->getFileName();
+
+        $rfBackgroundPHPTask = new \ReflectionClass ('BackgroundPHPTask');
+        $BackgroundPHPTaskClassFile = $rfBackgroundPHPTask->getFileName();
+
+
+        $daemonScript = 
+        '<?php
+           require_once("' . $BackgroundTasksManagerClassFile . '");
+           require_once("' . $BackgroundPHPTaskClassFile . '");
+           
+           $taskManager = new BackgroundTasksManager("' . $this->base_path . '");
+           while(1)
+           {
+                $this->load();
+                $this->check_queue();
+                sleep(' . $delay .');
+           }
+           '
+        ;
+        $daemonTask = new BackgroundPHPTask();
+        $daemonTask->set_phpScriptWithoutFile($daemonScript)->exec();
+        
+        return $this;
     }
 
     public function purge_terminated_tasks()

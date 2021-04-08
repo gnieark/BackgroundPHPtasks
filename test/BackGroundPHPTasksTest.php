@@ -238,5 +238,12 @@ class BackGroundPHPTasksTest extends TestCase
 
 
     }
+    public function testDaemon()
+    {
+        $fileOut = tempnam( sys_get_temp_dir(), 'out');
+        $script1 = '<?php file_put_contents("' . $fileOuT .'", "first",FILE_APPEND); sleep(2);';
+        $script2 = '<?php file_put_contents("' . $fileOuT .'", "second",FILE_APPEND); sleep(2);';
+        $script3 = '<?php file_put_contents("' . $fileOuT .'", "third",FILE_APPEND); sleep(2);';
+    }
 
 }
