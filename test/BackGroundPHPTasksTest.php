@@ -265,7 +265,7 @@ class BackGroundPHPTasksTest extends TestCase
 
         $taskManager->add_task_on_queue($task1)->add_task_on_queue($task2)->add_task_on_queue($task3);
 
-        $taskManager->daemonize_check_queue();
+        $taskManager->daemonize_check_queue(3);
 
         //check for daemon pid file
         $this->assertFileExists($basePath . "/taskmanagerDaemon.pid");
@@ -281,6 +281,8 @@ class BackGroundPHPTasksTest extends TestCase
             }
         }catch(Exception $e){}
         $this->assertTrue($is_running);
+        sleep(8);
+        $this->AssertEquals(  file_get_contents($fileOut),"firstsecondthird" );
 
 
     }
