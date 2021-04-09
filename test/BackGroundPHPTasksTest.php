@@ -284,6 +284,18 @@ class BackGroundPHPTasksTest extends TestCase
         sleep(8);
         $this->AssertEquals(  file_get_contents($fileOut),"firstsecondthird" );
 
+        $taskManager->daemon_stop();
+        
+        $data = file($basePath . "/taskmanagerDaemon.pid");
+        $pid = intval( $data[count($data) -1] );
+        $is_running = false;
+        try{
+            $result = shell_exec(sprintf("ps %s", $pid));
+            if( count(preg_split("/\n/", $result)) > 2){
+               $is_running = true; 
+            }
+        }catch(Exception $e){}
+        $this->assertFalse($is_running);
 
     }
 
