@@ -134,8 +134,8 @@ class BackgroundTasksManager
            $taskManager = new BackgroundTasksManager("' . $this->base_path . '");
            while(1)
            {
-                $this->load();
-                $this->check_queue();
+                $taskManager->load();
+                $taskManager->check_queue();
                 sleep(' . $delay .');
            }
            '
@@ -145,6 +145,7 @@ class BackgroundTasksManager
         $daemonTask ->set_pidFile( $this->get_daemon_pid_file() ) 
                     ->set_phpScriptWithoutFile($daemonScript)
                     ->exec();
+        
         
         return $this;
     }

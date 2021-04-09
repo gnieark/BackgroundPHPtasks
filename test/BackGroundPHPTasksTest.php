@@ -267,6 +267,20 @@ class BackGroundPHPTasksTest extends TestCase
 
         $taskManager->daemonize_check_queue();
 
+        //check for daemon pid file
+        $this->assertFileExists($basePath . "/taskmanagerDaemon.pid");
+        
+        //is runing?
+        $data = file($basePath . "/taskmanagerDaemon.pid");
+        $pid = intval( $data[count($data) -1] );
+        $is_running = false;
+        try{
+            $result = shell_exec(sprintf("ps %s", $pid));
+            if( count(preg_split("/\n/", $result)) > 2){
+               $is_running = true; 
+            }
+        }catch(Exception $e){}
+        $this->assertTrue($is_running);
 
 
     }

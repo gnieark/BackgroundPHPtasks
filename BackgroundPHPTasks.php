@@ -31,7 +31,10 @@ class BackgroundPHPTask
     {
         return $this->pidFile;
     }
-
+    public function get_phpScript()
+    {
+        return $this->phpScript;
+    }
     private function get_pid_from_pidfile()
     {
         
