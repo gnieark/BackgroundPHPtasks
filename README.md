@@ -4,4 +4,5 @@
 
 Manage php scripts scripts running on background process.
 
-Work in progress, not working yet.
+/bin/bash: :wq : commande introuvable
+.
