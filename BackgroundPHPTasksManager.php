@@ -141,7 +141,10 @@ class BackgroundTasksManager
            '
         ;
         $daemonTask = new BackgroundPHPTask();
-        $daemonTask->set_phpScriptWithoutFile($daemonScript)->exec();
+
+        $daemonTask ->set_pidFile( $this->get_daemon_pid_file() ) 
+                    ->set_phpScriptWithoutFile($daemonScript)
+                    ->exec();
         
         return $this;
     }
@@ -221,8 +224,11 @@ class BackgroundTasksManager
         {
             $task->stop()->remove_output_file();
         }
+        $this->daemon_stop();
+
         @unlink ( $this->get_pid_file_path() );
         @unlink ( $this->get_backup_file() );
+        @unlink ( $this->get_daemon_pid_file() );
         return $this;
     }
 

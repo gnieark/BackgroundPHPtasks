@@ -47,9 +47,9 @@ class BackgroundPHPTask
 
     public function set_phpScriptWithoutFile(string $script)
     {
-        $scriptFullName = tempnam(sys_get_temp_dir(), 'BackgroundPhpTask');
-        file_put_contents($scriptFullName, $script);
-        return $this->set_phpScript($scriptFullName);
+        $scriptPath= tempnam(sys_get_temp_dir(), 'BackgroundPhpTask');
+        file_put_contents($scriptPath, $script);
+        return $this->set_phpScript($scriptPath);
     }
 
     public function set_identifier($identifier)

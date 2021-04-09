@@ -240,10 +240,35 @@ class BackGroundPHPTasksTest extends TestCase
     }
     public function testDaemon()
     {
+        $basePath = sys_get_temp_dir()."/BackgroundTasksManager";
+        //purge base path
+        $files = glob($basePath .'/*'); // get all file names
+        foreach($files as $file){ // iterate files
+            if(is_file($file)) {
+                unlink($file); // delete file
+            }
+        }
+        
         $fileOut = tempnam( sys_get_temp_dir(), 'out');
         $script1 = '<?php file_put_contents("' . $fileOut .'", "first",FILE_APPEND); sleep(2);';
         $script2 = '<?php file_put_contents("' . $fileOut .'", "second",FILE_APPEND); sleep(2);';
         $script3 = '<?php file_put_contents("' . $fileOut .'", "third",FILE_APPEND); sleep(2);';
+
+        $taskManager = new BackgroundTasksManager($basePath);
+
+        $task1 = new BackgroundPHPTask();
+        $task1 ->set_phpScriptWithoutFile($script1);
+        $task2 = new BackgroundPHPTask();
+        $task2 ->set_phpScriptWithoutFile($script2);
+        $task3 = new BackgroundPHPTask();
+        $task3 ->set_phpScriptWithoutFile($script3);
+
+        $taskManager->add_task_on_queue($task1)->add_task_on_queue($task2)->add_task_on_queue($task3);
+
+        $taskManager->daemonize_check_queue();
+
+
+
     }
 
 }
