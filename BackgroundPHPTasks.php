@@ -3,7 +3,7 @@ class BackgroundPHPTask
 {
   
     /**
-     * The TplBlock class.
+     * The BackgroundPHPTask class.
      *
      * @category Process
      * @package  BackgroundPHPTask
@@ -273,7 +273,7 @@ class BackgroundPHPTask
      * @return BackgroundPHPTask for chaining
      * 
      */
-    
+
     public function remove_output_file()
     {
         if(file_exists ( $this->outputFile )){
