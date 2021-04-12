@@ -2,23 +2,73 @@
 
 class BackgroundTasksManager
 {
+    /**
+     * The BackgroundTasksManager class.
+     *
+     * @category Process
+     * @package  BackgroundPHPTask
+     * @author   gnieark <gnieark@tinad.fr>
+     * @license  GNU General Public License V3
+     * @link     https://github.com/gnieark/BackgroundPHPtasks
+     */
 
-    private $base_path; //where pid file, logs and output are stored
+
+    /**
+     * Writable directory where pid file, logs and output are stored
+     *
+     * @var string
+     */
+
+    private $base_path;
+
+    /**
+     * list containing BackgroundTasks objects
+     *
+     * @var string
+     */
+
     private $tasks = array();
+
+    /**
+     * Return the pid file used by default for tasks in queue
+     *
+     * @return string 
+     */
 
     private function get_pid_file_path()
     {
         return $this->base_path . "/TaskManager.pid";
     }
 
+    /**
+     * The goal is to manage long time process. The object have to be reloadable
+     *  so, after some changes
+     * the current object is serialized and saved. This give the backup file
+     *
+     * @return string 
+     */
+
     private function get_backup_file()
     {
         return $this->base_path . "/TaskManager.serialized";
     }
+
+    /**
+     * If the daemon is launched, it uses a specific PID file
+     *
+     * @return string 
+     */
+
     private function get_daemon_pid_file()
     {
         return $this->base_path . "/taskmanagerDaemon.pid";
     }
+
+    /**
+     * Construct function
+     *
+     * @param string $base_path Writable path.
+     */
 
     public function __construct($base_path)
     {
@@ -26,13 +76,27 @@ class BackgroundTasksManager
         $this->load();
     }
 
+    /**
+     *  Check for an exixting backup un the base path
+     *  and load it on the current object
+     * 
+     * @return BackgroundTasksManager for chaining
+     */
+
     public function load(){
         if(file_exists($this->get_backup_file())){
             $arr = unserialize (file_get_contents( $this->get_backup_file() ));
             $this->base_path = $arr['base_path'];
             $this->tasks = $arr['tasks'];
         }
+        return $this;
     }
+
+    /**
+     *  Serialize current object and store it
+     * 
+     * @return BackgroundTasksManager for chaining
+     */
 
     public function save(){
         $arr = array(
@@ -40,20 +104,25 @@ class BackgroundTasksManager
             "tasks"     => $this->tasks
         );
         file_put_contents($this->get_backup_file() , serialize($arr));
+        return $this;
     }
 
-    /*
-    * Add a task that, if not running will be executed only when no others tasks are terminated
-    * If $startnow is true, it wil be launched now
-    */
+    /**
+     *  Add a task on queue
+     * 
+     * @param $backgroundPHPTask a BackgroundPHPTask object to add on queue
+     * if not running will be executed only when no others tasks are terminated.
+     * @param $startnow If is true, it wil be launched now
+     * 
+     * @return BackgroundTasksManager for chaining
+     */
+
     public function add_task_on_queue (BackgroundPHPTask $backgroundPHPTask, bool $startnow = false)
     {
         if(empty($backgroundPHPTask->get_pifFile() ))
         {
             $backgroundPHPTask-> set_pidFile ( $this->get_pid_file_path() );
         }
-
-
 
         if($startnow && !($backgroundPHPTask->get_status() == "running") )
         {
@@ -62,8 +131,13 @@ class BackgroundTasksManager
         $this->tasks[] = $backgroundPHPTask;
         $this->check_queue();
         return $this;
-
     }
+
+   /**
+     *  check queue
+     *  and evntentualy exec the oldest pending task 
+     * @return BackgroundTasksManager for chaining
+     */
 
     public function check_queue()
     {
@@ -84,10 +158,11 @@ class BackgroundTasksManager
         return $this;
     } 
 
-    /*
-    * Return false if not running
-    * return the pid  if running
+    /** 
+    * Use the pid, and test (Linux only) if running
+    * @return bool
     */
+
     public function is_daemon_running()
     {
         if(!file_exists($this->get_daemon_pid_file())){
@@ -97,6 +172,11 @@ class BackgroundTasksManager
         $daemonPid = intval( $data[count($data) -1] );
         return $daemonPid ;
     }
+
+    /** 
+    * kill the process
+    * @return BackgroundTasksManager for chaining
+    */
 
     public function daemon_stop()
     {
@@ -110,10 +190,12 @@ class BackgroundTasksManager
         return $this;
     }
 
-    /*
-    * @input $delay : seconds
-    *   
+    /**
+    * Launch a process witch will check_queue regularly 
+    * @param integer $delay : seconds
+    * @return BackgroundTasksManager for chaining
     */
+
     public function daemonize_check_queue($delay = 10)
     {
    
@@ -150,6 +232,12 @@ class BackgroundTasksManager
         return $this;
     }
 
+    /**
+    * kills an remove files 
+    * @return BackgroundTasksManager for chaining
+    *   
+    */
+
     public function purge_terminated_tasks()
     {
         for ($i = 0; $i < count ($this->tasks); $i++)
@@ -164,9 +252,14 @@ class BackgroundTasksManager
         return $this;
     }
     
-    /*
-    * Remove non existing PID on pid file
+ 
+    /**
+    * If many pids on pid file, remove unknowed ones
+    *
+    * @return BackgroundTasksManager for chaining
+    *   
     */
+
     private function clean_pid_file($killUnknowedProcess = false)
     {
         $existingPids = array();
@@ -210,15 +303,27 @@ class BackgroundTasksManager
         fclose( $this->get_pid_file_path() );
     }
 
+    /**
+    * check if  a process is running
+    *
+    * @return bool
+    *   
+    */
+
     private function isProcessRunning($pid)
     {
         // Warning: this will only work on Unix
         return ($pid !== '') && file_exists("/proc/$pid");
     }
 
-    /*
+
+    /**
     * stop all running tasks, remove PID file and knowed output files
+    *
+    * @return BackgroundTasksManager for chaining
+    *   
     */
+    
     public function stop_and_remove()
     {
         foreach($this->tasks as $task)
