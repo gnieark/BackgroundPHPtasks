@@ -1,5 +1,5 @@
 {
-    "name": "gnieark/BackgroundPHPtasks",
+    "name": "gnieark/backgroundphptasks",
     "description": "Manage php scripts scripts running on background process.",
     "type": "library",
     "require": {
