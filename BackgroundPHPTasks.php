@@ -14,40 +14,31 @@ class BackgroundPHPTask
 
     /**
      * The full path of the pid file to use or create.
-     *
-     * @var string
      */
 
-    private $pidFile = "";
+    private string $pidFile = "";
 
     /**
      * the pid id, will be populated after exec.
-     *
-     * @var int
      */
 
-    private $pid;
+    private int $pid;
 
     /**
      * Where is stored the script output.
-     *
-     * @var string
      */
 
-    private $outputFile = "/dev/null";
+    private string $outputFile = "/dev/null";
 
     /**
      * The php's script to execute full path + name .
-     *
-     * @var string
      */
 
-    private $phpScript;
+    private string $phpScript;
 
     /**
      * Args to pass to the script when called. /!\Shell arguments, not query args $_GET 
      * 
-     * @var array
      */
 
     private $args = array();
@@ -56,28 +47,25 @@ class BackgroundPHPTask
     /**
     * Store the status
     * 
-    * @var string
     */
 
 
-    private $status = "pending"; //should be pending/running/terminated
+    private string $status = "pending"; //should be pending/running/terminated
 
     /**
      * Use it as title, unique-key, as you want
      *
-     * @var string
      */
 
-    private $identifier =""; //not the PID, juste another identifier if needed
+    private string $identifier =""; //not the PID, juste another identifier if needed
 
     /**
      * Return the status, Eventually check for a change before
      *
-     * @return string 
      */
 
 
-    public function get_status()
+    public function get_status():string
     {
         if( ( $this->status == "running" ) && (!$this->is_running()) )
         {
@@ -89,10 +77,9 @@ class BackgroundPHPTask
     /**
      * Return the pid (normaly useless,for debug)
      *
-     * @return integer
      */
 
-    public function get_pid()
+    public function get_pid():int
     {
         return $this->pid;
     }
@@ -100,10 +87,9 @@ class BackgroundPHPTask
     /**
      * Return the pid file path (normaly useless,for debug)
      *
-     * @return string
      */
  
-    public function get_pifFile()
+    public function get_pifFile():string
     {
         return $this->pidFile;
     }
@@ -111,10 +97,9 @@ class BackgroundPHPTask
     /**
      * Return the php script file path (normaly useless,for debug)
      *
-     * @return string
      */
 
-    public function get_phpScript()
+    public function get_phpScript():string
     {
         return $this->phpScript;
     }
@@ -122,10 +107,9 @@ class BackgroundPHPTask
     /**
      * Return the last pid on a pid file
      *
-     * @return integer
      */
 
-    private function get_pid_from_pidfile()
+    private function get_pid_from_pidfile():int
     {
         
         $data = file($this->pidFile);
@@ -140,7 +124,7 @@ class BackgroundPHPTask
      * @param $phpScript the path
      */
 
-    public function set_phpScript(string $phpScript)
+    public function set_phpScript(string $phpScript):BackgroundPHPTask
     {
         $this->phpScript = $phpScript;
         return $this;
@@ -154,7 +138,7 @@ class BackgroundPHPTask
      * @param $script the script. containing the opening bracket <?php
      */
 
-    public function set_phpScriptWithoutFile(string $script)
+    public function set_phpScriptWithoutFile(string $script):BackgroundPHPTask
     {
         $scriptPath= tempnam(sys_get_temp_dir(), 'BackgroundPhpTask');
         file_put_contents($scriptPath, $script);
@@ -167,7 +151,7 @@ class BackgroundPHPTask
      * 
      * @param string $identifier, what you want
      */
-    public function set_identifier(string $identifier)
+    public function set_identifier(string $identifier):BackgroundPHPTask
     {
         $this->identifier = $identifier;
         return $this;
@@ -181,7 +165,7 @@ class BackgroundPHPTask
      * @param string $arg, what you want
      */
 
-    public function add_arg(string $arg){
+    public function add_arg(string $arg):BackgroundPHPTask{
         $this->args[] = escapeshellarg($arg);
         return $this;
     }
@@ -195,7 +179,7 @@ class BackgroundPHPTask
      * @param string Path of output file (will be created if not yet existing)
      */
 
-    public function set_outputFile(string $outputFile)
+    public function set_outputFile(string $outputFile):BackgroundPHPTask
     {
         $this->outputFile = $outputFile;
         return $this;
@@ -210,7 +194,7 @@ class BackgroundPHPTask
      * @param string Path of pid file (will be created if not yet existing)
      */
 
-    public function set_pidFile(string $pidFile)
+    public function set_pidFile(string $pidFile):BackgroundPHPTask
     {
         $this->pidFile = $pidFile;
         return $this;
@@ -224,7 +208,7 @@ class BackgroundPHPTask
      */
 
 
-    public function exec()
+    public function exec():void
     {
         if(is_null($this->phpScript))
         {
@@ -243,7 +227,7 @@ class BackgroundPHPTask
      * @return bool
      */
 
-    public function is_running()
+    public function is_running():boolean
     {
         try{
             $result = shell_exec(sprintf("ps %s", $this->pid));
@@ -261,7 +245,7 @@ class BackgroundPHPTask
      * 
      */
 
-    public function stop()
+    public function stop():BackgroundPHPTask
     {
         posix_kill( $this->pid, SIGTERM );
         return $this;
@@ -274,7 +258,7 @@ class BackgroundPHPTask
      * 
      */
 
-    public function remove_output_file()
+    public function remove_output_file():BackgroundPHPTask
     {
         if(file_exists ( $this->outputFile )){
             unlink($this->outputFile);

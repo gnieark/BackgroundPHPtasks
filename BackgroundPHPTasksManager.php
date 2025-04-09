@@ -16,26 +16,23 @@ class BackgroundTasksManager
     /**
      * Writable directory where pid file, logs and output are stored
      *
-     * @var string
      */
 
-    private $base_path;
+    private string $base_path;
 
     /**
      * list containing BackgroundTasks objects
      *
-     * @var string
      */
 
-    private $tasks = array();
+    private array $tasks = array();
 
     /**
      * Return the pid file used by default for tasks in queue
      *
-     * @return string 
      */
 
-    private function get_pid_file_path()
+    private function get_pid_file_path():string
     {
         return $this->base_path . "/TaskManager.pid";
     }
@@ -45,10 +42,9 @@ class BackgroundTasksManager
      *  so, after some changes
      * the current object is serialized and saved. This give the backup file
      *
-     * @return string 
      */
 
-    private function get_backup_file()
+    private function get_backup_file():string
     {
         return $this->base_path . "/TaskManager.serialized";
     }
@@ -56,10 +52,9 @@ class BackgroundTasksManager
     /**
      * If the daemon is launched, it uses a specific PID file
      *
-     * @return string 
      */
 
-    private function get_daemon_pid_file()
+    private function get_daemon_pid_file() :string
     {
         return $this->base_path . "/taskmanagerDaemon.pid";
     }
@@ -83,7 +78,7 @@ class BackgroundTasksManager
      * @return BackgroundTasksManager for chaining
      */
 
-    public function load(){
+    public function load():BackgroundTasksManager{
         if(file_exists($this->get_backup_file())){
             $arr = unserialize (file_get_contents( $this->get_backup_file() ));
             $this->base_path = $arr['base_path'];
@@ -98,7 +93,7 @@ class BackgroundTasksManager
      * @return BackgroundTasksManager for chaining
      */
 
-    public function save(){
+    public function save():BackgroundTasksManager{
         $arr = array(
             "base_path" => $this->base_path,
             "tasks"     => $this->tasks
@@ -117,7 +112,7 @@ class BackgroundTasksManager
      * @return BackgroundTasksManager for chaining
      */
 
-    public function add_task_on_queue (BackgroundPHPTask $backgroundPHPTask, bool $startnow = false)
+    public function add_task_on_queue (BackgroundPHPTask $backgroundPHPTask, bool $startnow = false):BackgroundTasksManager
     {
         if(empty($backgroundPHPTask->get_pifFile() ))
         {
@@ -139,7 +134,7 @@ class BackgroundTasksManager
      * @return BackgroundTasksManager for chaining
      */
 
-    public function check_queue()
+    public function check_queue():BackgroundTasksManager
     {
         $lastStatus = "terminated";
         foreach($this->tasks as $task)
@@ -160,10 +155,9 @@ class BackgroundTasksManager
 
     /** 
     * Use the pid, and test (Linux only) if running
-    * @return bool
     */
 
-    public function is_daemon_running()
+    public function is_daemon_running():bool
     {
         if(!file_exists($this->get_daemon_pid_file())){
             return false;
@@ -178,7 +172,7 @@ class BackgroundTasksManager
     * @return BackgroundTasksManager for chaining
     */
 
-    public function daemon_stop()
+    public function daemon_stop():BackgroundTasksManager
     {
         $daemonPid = $this->is_daemon_running();
         if($daemonPid)
@@ -196,7 +190,7 @@ class BackgroundTasksManager
     * @return BackgroundTasksManager for chaining
     */
 
-    public function daemonize_check_queue($delay = 10)
+    public function daemonize_check_queue(int $delay = 10):BackgroundTasksManager
     {
    
         $this->daemon_stop();
