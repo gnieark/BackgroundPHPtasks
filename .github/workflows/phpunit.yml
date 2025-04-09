@@ -12,7 +12,7 @@ on:
 
 jobs:
   phpunit:
-    runs-on: ubunt-latest
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
